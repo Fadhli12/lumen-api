@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -49,6 +50,17 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+//        return parent::render($request, $exception);
+        $rendered = parent::render($request, $exception);
+        $err = [
+            'error' => [
+                'code' => $rendered->getStatusCode(),
+                'message' => $exception->getMessage(),
+            ]
+        ];
+        if ($rendered->getStatusCode() == 422 && $exception instanceof ValidationException && $exception->getResponse()){
+            $err['error']['validation_error'] = $exception->getResponse()->original;
+        }
+        return response()->json($err, $rendered->getStatusCode());
     }
 }

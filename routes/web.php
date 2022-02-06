@@ -1,7 +1,6 @@
 <?php
 
 /** @var \Laravel\Lumen\Routing\Router $router */
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -12,7 +11,10 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-
+$router->group(['middleware' => 'client'],function ()use($router){
+    $router->post('get-offer',"OfferController@getOffer");
+    $router->post('claim-offer',"OfferController@claimOffer");
+});
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
